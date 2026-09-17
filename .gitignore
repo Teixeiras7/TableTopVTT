@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+generated/
+*.tsbuildinfo
+*.db
+*.db-journal
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# Material com direitos autorais (livro oficial) — só referência local, não versionar
+manual/*.pdf

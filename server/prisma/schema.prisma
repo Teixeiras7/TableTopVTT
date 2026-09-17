@@ -1,0 +1,409 @@
+// Schema inicial (Etapa 2 do plano).
+// Escopo: contas/mesas, catálogo estático de Reinos de Ferro e personagens.
+// Combate, tabuleiro/tokens e chat ficam para as etapas 7-9, quando o Rules
+// Engine (Etapa 4) já tiver definido o formato de efeitos/condições ativas.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Contas e mesas
+// ---------------------------------------------------------------------------
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senhaHash String
+  criadoEm  DateTime @default(now())
+
+  mesasCriadas Mesa[]       @relation("MesaCriador")
+  mesas        MesaMembro[]
+  personagens  Personagem[]
+}
+
+model Mesa {
+  id            Int      @id @default(autoincrement())
+  nome          String
+  codigo        String   @unique
+  criadorId     Int
+  criador       Usuario  @relation("MesaCriador", fields: [criadorId], references: [id])
+  colunas       Int      @default(20)
+  linhas        Int      @default(15)
+  tamanhoCelula Int      @default(48)
+  criadoEm      DateTime @default(now())
+
+  membros     MesaMembro[]
+  personagens Personagem[]
+}
+
+model MesaMembro {
+  id        Int     @id @default(autoincrement())
+  usuarioId Int
+  mesaId    Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  mesa      Mesa    @relation(fields: [mesaId], references: [id])
+
+  @@unique([usuarioId, mesaId])
+}
+
+// ---------------------------------------------------------------------------
+// Catálogo estático — Reinos de Ferro
+// Cada conceito existe uma única vez; personagens referenciam por ID.
+// ---------------------------------------------------------------------------
+
+model Raca {
+  id              Int     @id @default(autoincrement())
+  nome            String  @unique
+  // Perfil de atributos (inicial + teto por nível) por atributo.
+  // É sempre lido/gravado como um bloco só (nunca filtrado atributo a
+  // atributo entre raças), por isso fica em JSON em vez de 36 colunas.
+  atributos       Json
+  idiomas         String? // lista separada por vírgula
+  caracteristicas String? // texto livre: traços raciais adicionais
+
+  arquetipos  Arquetipo[]
+  carreiras   Carreira[]
+  personagens Personagem[]
+}
+
+model Arquetipo {
+  id          Int    @id @default(autoincrement())
+  nome        String @unique
+  passivaFixa String // benefício sempre concedido
+  opcoesTexto String // lista de opções iniciais à escolha (texto livre por ora)
+
+  racas       Raca[]
+  carreiras   Carreira[]
+  personagens Personagem[]
+}
+
+model Pericia {
+  id             Int     @id @default(autoincrement())
+  nome           String  @unique
+  atributo       String // código do atributo usado (ex: "mae", "int"), "social", ou uma forma especial (ex: "menor-entre:agi,per")
+  categoria      String // "militar" | "profissional" | "geral"
+  semTreinamento Boolean @default(true)
+  repetivel      Boolean @default(false) // ex: Ofício, Idioma, Conhecimento
+  observacao     String? // nuances de forma especial de atributo, regras extras da perícia
+
+  carreiras          CarreiraPericia[]
+  personagemPericias PersonagemPericia[]
+  armas              Arma[]
+  opcoesEscolha      CarreiraEscolhaOpcao[]
+}
+
+model Habilidade {
+  id            Int     @id @default(autoincrement())
+  nome          String  @unique
+  preRequisito  String? // texto livre; vira regra estruturada na Etapa 4
+  efeito        String
+  repetivel     Boolean @default(false)
+  parametroTipo String? // ex: "arma", "idioma" — null quando não repetível
+
+  carreiras             CarreiraHabilidade[]
+  personagemHabilidades PersonagemHabilidade[]
+  opcoesEscolha         CarreiraEscolhaOpcao[]
+}
+
+model Conexao {
+  id        Int    @id @default(autoincrement())
+  nome      String @unique
+  beneficio String
+
+  carreiras          CarreiraConexao[]
+  personagemConexoes PersonagemConexao[]
+}
+
+model Item {
+  id              Int     @id @default(autoincrement())
+  nome            String  @unique
+  categoria       String // "arma" | "armadura" | "vestuario" | "equipamento" | "alquimia" | "mekanica" | "municao" | "montaria"
+  custo           Int // em Coroas (CO)
+  descricao       String?
+  regrasEspeciais String?
+
+  arma          Arma?
+  armadura      Armadura?
+  inventario    InventarioItem[]
+  carreiras     CarreiraItemInicial[]
+  opcoesEscolha CarreiraEscolhaOpcao[]
+}
+
+model Arma {
+  id                Int     @id @default(autoincrement())
+  itemId            Int     @unique
+  item              Item    @relation(fields: [itemId], references: [id])
+  periciaId         Int
+  pericia           Pericia @relation(fields: [periciaId], references: [id])
+  modificadorAtaque Int     @default(0)
+  pod               Int?
+  distancia         Boolean @default(false) // true = arma de ataque à distância
+  alcanceEfetivo    Int?
+  alcanceExtremo    Int?
+  ade               String? // diâmetro de explosão, "--" quando não há
+  municaoCapacidade Int?
+  municaoTipo       String?
+}
+
+model Armadura {
+  id            Int  @id @default(autoincrement())
+  itemId        Int  @unique
+  item          Item @relation(fields: [itemId], references: [id])
+  modVelocidade Int  @default(0)
+  modDefesa     Int  @default(0)
+  modArmadura   Int  @default(0)
+}
+
+model Magia {
+  id          Int     @id @default(autoincrement())
+  nome        String  @unique
+  custo       Int // CST, em pontos de fadiga ou foco
+  alcance     String // ALC — número em metros, "CJR" (pessoal) ou "CTR" (área de controle)
+  ade         String? // diâmetro de explosão, "--" quando não há
+  pod         String? // dano; "--" quando a magia não causa dano
+  sustentavel Boolean @default(false) // MAN
+  atributo    String? // atributo usado na jogada de ataque mágico; "*" = regra especial
+  efeito      String
+
+  carreiras        CarreiraMagia[]
+  personagemMagias PersonagemMagia[]
+}
+
+// ---------------------------------------------------------------------------
+// Carreiras — concessões iniciais e opções de progressão
+// ---------------------------------------------------------------------------
+
+model Carreira {
+  id                 Int        @id @default(autoincrement())
+  nome               String     @unique
+  racaExigidaId      Int?
+  racaExigida        Raca?      @relation(fields: [racaExigidaId], references: [id])
+  arquetipoExigidoId Int?
+  arquetipoExigido   Arquetipo? @relation(fields: [arquetipoExigidoId], references: [id])
+  apenasInicial      Boolean    @default(false)
+  ouroInicial        Int        @default(0)
+  // Pré-requisitos compostos, restrição de 2ª carreira, variantes de carreira
+  // etc. — texto livre até a Etapa 4 estruturar isso no Rules Engine.
+  regrasExtra        String?
+
+  pericias    CarreiraPericia[]
+  habilidades CarreiraHabilidade[]
+  conexoes    CarreiraConexao[]
+  itens       CarreiraItemInicial[]
+  magias      CarreiraMagia[]
+  escolhas    CarreiraEscolha[]
+  personagens PersonagemCarreira[]
+}
+
+// Grupos de escolha da carreira (ex.: "escolha 2 perícias militares entre:
+// Arma de Arremesso, Arma de Mão, Besta..."). Cada grupo tem N opções e o
+// jogador escolhe `quantidade` delas na criação do personagem.
+model CarreiraEscolha {
+  id         Int      @id @default(autoincrement())
+  carreiraId Int
+  carreira   Carreira @relation(fields: [carreiraId], references: [id])
+  tipo       String // "pericia-militar" | "pericia-profissional" | "habilidade" | "item"
+  quantidade Int
+  descricao  String?
+
+  opcoes CarreiraEscolhaOpcao[]
+}
+
+model CarreiraEscolhaOpcao {
+  id           Int             @id @default(autoincrement())
+  escolhaId    Int
+  escolha      CarreiraEscolha @relation(fields: [escolhaId], references: [id])
+  periciaId    Int?
+  pericia      Pericia?        @relation(fields: [periciaId], references: [id])
+  habilidadeId Int?
+  habilidade   Habilidade?     @relation(fields: [habilidadeId], references: [id])
+  itemId       Int?
+  item         Item?           @relation(fields: [itemId], references: [id])
+  nivel        Int? // nível concedido, quando a opção é uma perícia
+  quantidade   Int? // quantidade do item, quando a opção é um item
+  parametro    String? // ex.: "Espada Longa", quando a opção é uma perícia/habilidade repetível parametrizada
+}
+
+// nivelConcedido != null  -> a carreira já dá esse nível de perícia na criação
+// nivelMaximo             -> teto até onde a perícia pode progredir nesta carreira
+model CarreiraPericia {
+  id             Int      @id @default(autoincrement())
+  carreiraId     Int
+  carreira       Carreira @relation(fields: [carreiraId], references: [id])
+  periciaId      Int
+  pericia        Pericia  @relation(fields: [periciaId], references: [id])
+  nivelConcedido Int?
+  nivelMaximo    Int?
+  subtipo        String? // ex.: "Trolloide" quando a perícia é "Conhecimento (Trolloide)"
+
+  @@unique([carreiraId, periciaId, subtipo])
+}
+
+model CarreiraHabilidade {
+  id               Int        @id @default(autoincrement())
+  carreiraId       Int
+  carreira         Carreira   @relation(fields: [carreiraId], references: [id])
+  habilidadeId     Int
+  habilidade       Habilidade @relation(fields: [habilidadeId], references: [id])
+  concedidaInicial Boolean    @default(false)
+  parametro        String? // ex.: "Alabarda" quando a habilidade é "Especialização (Alabarda)"
+
+  @@unique([carreiraId, habilidadeId, parametro])
+}
+
+model CarreiraConexao {
+  id         Int      @id @default(autoincrement())
+  carreiraId Int
+  carreira   Carreira @relation(fields: [carreiraId], references: [id])
+  conexaoId  Int
+  conexao    Conexao  @relation(fields: [conexaoId], references: [id])
+
+  @@unique([carreiraId, conexaoId])
+}
+
+model CarreiraItemInicial {
+  id         Int      @id @default(autoincrement())
+  carreiraId Int
+  carreira   Carreira @relation(fields: [carreiraId], references: [id])
+  itemId     Int
+  item       Item     @relation(fields: [itemId], references: [id])
+  quantidade Int      @default(1)
+
+  @@unique([carreiraId, itemId])
+}
+
+model CarreiraMagia {
+  id         Int      @id @default(autoincrement())
+  carreiraId Int
+  carreira   Carreira @relation(fields: [carreiraId], references: [id])
+  magiaId    Int
+  magia      Magia    @relation(fields: [magiaId], references: [id])
+
+  @@unique([carreiraId, magiaId])
+}
+
+// ---------------------------------------------------------------------------
+// Personagens — estado dinâmico, referenciando o catálogo estático por ID
+// ---------------------------------------------------------------------------
+
+model Personagem {
+  id        Int     @id @default(autoincrement())
+  nome      String
+  imagem    String?
+  descricao String?
+
+  usuarioId   Int
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  mesaId      Int
+  mesa        Mesa      @relation(fields: [mesaId], references: [id])
+  racaId      Int
+  raca        Raca      @relation(fields: [racaId], references: [id])
+  arquetipoId Int
+  arquetipo   Arquetipo @relation(fields: [arquetipoId], references: [id])
+
+  nivel         String @default("heroi") // "heroi" | "veterano" | "epico"
+  experiencia   Int    @default(0)
+  pontosFacanha Int    @default(3)
+
+  // Atributos primários e secundários — colunas, não JSON: são referenciados
+  // individualmente pelas fórmulas do Rules Engine (Etapa 4).
+  fis Int
+  agi Int
+  int Int
+  vel Int
+  for Int
+  des Int
+  mae Int
+  per Int
+  arc Int @default(0)
+
+  fadigaAtual Int @default(0)
+  focoAtual   Int @default(0)
+
+  // Espiral vital (trilha de HP): 3 eixos x 2 ramos, sempre lida/gravada
+  // inteira de uma vez — não é filtrada pip a pip entre personagens.
+  espiralVital Json
+
+  criadoEm DateTime @default(now())
+
+  carreiras   PersonagemCarreira[]
+  pericias    PersonagemPericia[]
+  habilidades PersonagemHabilidade[]
+  conexoes    PersonagemConexao[]
+  magias      PersonagemMagia[]
+  inventario  InventarioItem[]
+}
+
+model PersonagemCarreira {
+  id           Int        @id @default(autoincrement())
+  personagemId Int
+  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  carreiraId   Int
+  carreira     Carreira   @relation(fields: [carreiraId], references: [id])
+  ordem        Int // 1 ou 2 nas carreiras iniciais; 3+ em progressão futura
+
+  @@unique([personagemId, carreiraId])
+}
+
+model PersonagemPericia {
+  id           Int        @id @default(autoincrement())
+  personagemId Int
+  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  periciaId    Int
+  pericia      Pericia    @relation(fields: [periciaId], references: [id])
+  nivel        Int        @default(1)
+  subtipo      String? // ex: "Ofício (Ferreiro)"
+
+  @@unique([personagemId, periciaId, subtipo])
+}
+
+model PersonagemHabilidade {
+  id           Int        @id @default(autoincrement())
+  personagemId Int
+  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  habilidadeId Int
+  habilidade   Habilidade @relation(fields: [habilidadeId], references: [id])
+  parametro    String? // ex: "Espada Larga" em Especialização (arma)
+
+  @@unique([personagemId, habilidadeId, parametro])
+}
+
+model PersonagemConexao {
+  id           Int        @id @default(autoincrement())
+  personagemId Int
+  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  conexaoId    Int
+  conexao      Conexao    @relation(fields: [conexaoId], references: [id])
+
+  @@unique([personagemId, conexaoId])
+}
+
+model PersonagemMagia {
+  id           Int        @id @default(autoincrement())
+  personagemId Int
+  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  magiaId      Int
+  magia        Magia      @relation(fields: [magiaId], references: [id])
+
+  @@unique([personagemId, magiaId])
+}
+
+model InventarioItem {
+  id           Int        @id @default(autoincrement())
+  personagemId Int
+  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  itemId       Int
+  item         Item       @relation(fields: [itemId], references: [id])
+  quantidade   Int        @default(1)
+  notasEstado  String? // ex: munição restante, marcas de dano — cresce na Etapa 7
+
+  @@unique([personagemId, itemId])
+}

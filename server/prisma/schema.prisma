@@ -34,7 +34,7 @@ model Mesa {
   nome          String
   codigo        String   @unique
   criadorId     Int
-  criador       Usuario  @relation("MesaCriador", fields: [criadorId], references: [id])
+  criador       Usuario  @relation("MesaCriador", fields: [criadorId], references: [id], onDelete: Cascade)
   colunas       Int      @default(20)
   linhas        Int      @default(15)
   tamanhoCelula Int      @default(48)
@@ -48,8 +48,8 @@ model MesaMembro {
   id        Int     @id @default(autoincrement())
   usuarioId Int
   mesaId    Int
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
-  mesa      Mesa    @relation(fields: [mesaId], references: [id])
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  mesa      Mesa    @relation(fields: [mesaId], references: [id], onDelete: Cascade)
 
   @@unique([usuarioId, mesaId])
 }
@@ -301,9 +301,9 @@ model Personagem {
   descricao String?
 
   usuarioId   Int
-  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   mesaId      Int
-  mesa        Mesa      @relation(fields: [mesaId], references: [id])
+  mesa        Mesa      @relation(fields: [mesaId], references: [id], onDelete: Cascade)
   racaId      Int
   raca        Raca      @relation(fields: [racaId], references: [id])
   arquetipoId Int
@@ -345,7 +345,7 @@ model Personagem {
 model PersonagemCarreira {
   id           Int        @id @default(autoincrement())
   personagemId Int
-  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  personagem   Personagem @relation(fields: [personagemId], references: [id], onDelete: Cascade)
   carreiraId   Int
   carreira     Carreira   @relation(fields: [carreiraId], references: [id])
   ordem        Int // 1 ou 2 nas carreiras iniciais; 3+ em progressão futura
@@ -356,7 +356,7 @@ model PersonagemCarreira {
 model PersonagemPericia {
   id           Int        @id @default(autoincrement())
   personagemId Int
-  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  personagem   Personagem @relation(fields: [personagemId], references: [id], onDelete: Cascade)
   periciaId    Int
   pericia      Pericia    @relation(fields: [periciaId], references: [id])
   nivel        Int        @default(1)
@@ -368,7 +368,7 @@ model PersonagemPericia {
 model PersonagemHabilidade {
   id           Int        @id @default(autoincrement())
   personagemId Int
-  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  personagem   Personagem @relation(fields: [personagemId], references: [id], onDelete: Cascade)
   habilidadeId Int
   habilidade   Habilidade @relation(fields: [habilidadeId], references: [id])
   parametro    String? // ex: "Espada Larga" em Especialização (arma)
@@ -379,7 +379,7 @@ model PersonagemHabilidade {
 model PersonagemConexao {
   id           Int        @id @default(autoincrement())
   personagemId Int
-  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  personagem   Personagem @relation(fields: [personagemId], references: [id], onDelete: Cascade)
   conexaoId    Int
   conexao      Conexao    @relation(fields: [conexaoId], references: [id])
 
@@ -389,7 +389,7 @@ model PersonagemConexao {
 model PersonagemMagia {
   id           Int        @id @default(autoincrement())
   personagemId Int
-  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  personagem   Personagem @relation(fields: [personagemId], references: [id], onDelete: Cascade)
   magiaId      Int
   magia        Magia      @relation(fields: [magiaId], references: [id])
 
@@ -399,7 +399,7 @@ model PersonagemMagia {
 model InventarioItem {
   id           Int        @id @default(autoincrement())
   personagemId Int
-  personagem   Personagem @relation(fields: [personagemId], references: [id])
+  personagem   Personagem @relation(fields: [personagemId], references: [id], onDelete: Cascade)
   itemId       Int
   item         Item       @relation(fields: [itemId], references: [id])
   quantidade   Int        @default(1)

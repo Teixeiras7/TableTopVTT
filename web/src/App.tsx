@@ -4,12 +4,8 @@ import type { ReactNode } from "react";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { Login } from "./pages/Login";
 import { Mesas } from "./pages/Mesas";
-import { Personagens } from "./pages/Personagens";
 import { CriarPersonagem } from "./pages/CriarPersonagem";
-import { Ficha } from "./pages/Ficha";
-import { Combates } from "./pages/Combates";
-import { Combate } from "./pages/Combate";
-import { Tabuleiro } from "./pages/Tabuleiro";
+import { MesaWorkspace } from "./pages/MesaWorkspace";
 
 const queryClient = new QueryClient();
 
@@ -36,14 +32,6 @@ export default function App() {
               }
             />
             <Route
-              path="/mesas/:mesaId/personagens"
-              element={
-                <RotaPrivada>
-                  <Personagens />
-                </RotaPrivada>
-              }
-            />
-            <Route
               path="/mesas/:mesaId/personagens/novo"
               element={
                 <RotaPrivada>
@@ -52,34 +40,10 @@ export default function App() {
               }
             />
             <Route
-              path="/mesas/:mesaId/personagens/:personagemId"
+              path="/mesas/:mesaId"
               element={
                 <RotaPrivada>
-                  <Ficha />
-                </RotaPrivada>
-              }
-            />
-            <Route
-              path="/mesas/:mesaId/combate"
-              element={
-                <RotaPrivada>
-                  <Combates />
-                </RotaPrivada>
-              }
-            />
-            <Route
-              path="/mesas/:mesaId/combate/:combateId"
-              element={
-                <RotaPrivada>
-                  <Combate />
-                </RotaPrivada>
-              }
-            />
-            <Route
-              path="/mesas/:mesaId/tabuleiro"
-              element={
-                <RotaPrivada>
-                  <Tabuleiro />
+                  <MesaWorkspace />
                 </RotaPrivada>
               }
             />

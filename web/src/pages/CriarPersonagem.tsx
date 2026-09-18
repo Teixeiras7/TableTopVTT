@@ -120,7 +120,7 @@ export function CriarPersonagem() {
         }),
       });
       setCriado(true);
-      setTimeout(() => navigate(`/mesas/${mesaId}/personagens`), 1200);
+      setTimeout(() => navigate(`/mesas/${mesaId}`), 1200);
     } catch (err) {
       const mensagens = err instanceof Error ? err.message.split("; ") : ["Erro desconhecido"];
       setErro(mensagens);

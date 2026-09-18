@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Variáveis do shadcn/ui mapeadas pra paleta escura do projeto (latão/ferro).
+   Só o tema escuro por enquanto — luz/escuro completo pros componentes shadcn
+   fica pro refinamento visual (Etapa 9); o workspace novo usa isso direto. */
+:root {
+  --radius: 0.5rem;
+  --background: #14110f;
+  --foreground: #ece4d6;
+  --card: #201b17;
+  --card-foreground: #ece4d6;
+  --popover: #201b17;
+  --popover-foreground: #ece4d6;
+  --primary: #b08d4f;
+  --primary-foreground: #14110f;
+  --secondary: #3a322a;
+  --secondary-foreground: #ece4d6;
+  --muted: #3a322a;
+  --muted-foreground: #a89a86;
+  --accent: #3a322a;
+  --accent-foreground: #ece4d6;
+  --destructive: #e0685a;
+  --border: #3a322a;
+  --input: #3a322a;
+  --ring: #b08d4f;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}

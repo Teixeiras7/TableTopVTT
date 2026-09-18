@@ -70,7 +70,7 @@ export function Mesas() {
       <ul className="lista lista-mesas">
         {mesas?.map((mesa) => (
           <li key={mesa.id} className="cartao">
-            <Link to={`/mesas/${mesa.id}/personagens`}>{mesa.nome}</Link>
+            <Link to={`/mesas/${mesa.id}`}>{mesa.nome}</Link>
             <span className="codigo">código: {mesa.codigo}</span>
           </li>
         ))}

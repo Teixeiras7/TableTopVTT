@@ -66,6 +66,7 @@ export interface Mesa {
   id: number;
   nome: string;
   codigo: string;
+  criadorId: number;
   colunas: number;
   linhas: number;
   tamanhoCelula: number;

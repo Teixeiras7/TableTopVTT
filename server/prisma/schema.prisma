@@ -1,7 +1,5 @@
-// Schema inicial (Etapa 2 do plano).
-// Escopo: contas/mesas, catálogo estático de Reinos de Ferro e personagens.
-// Combate, tabuleiro/tokens e chat ficam para as etapas 7-9, quando o Rules
-// Engine (Etapa 4) já tiver definido o formato de efeitos/condições ativas.
+// Contas/mesas, catálogo estático de Reinos de Ferro, personagens (Etapa 2-3)
+// e combate (Etapa 7). Tabuleiro/tokens e chat ficam para a Etapa 8.
 
 generator client {
   provider = "prisma-client-js"
@@ -42,6 +40,7 @@ model Mesa {
 
   membros     MesaMembro[]
   personagens Personagem[]
+  combates    CombateEncontro[]
 }
 
 model MesaMembro {
@@ -340,6 +339,7 @@ model Personagem {
   conexoes    PersonagemConexao[]
   magias      PersonagemMagia[]
   inventario  InventarioItem[]
+  combates    CombateParticipante[]
 }
 
 model PersonagemCarreira {
@@ -407,4 +407,67 @@ model InventarioItem {
   notasEstado  String? // ex: munição restante, marcas de dano — cresce na Etapa 7
 
   @@unique([personagemId, itemId])
+}
+
+// ---------------------------------------------------------------------------
+// Combate — Etapa 7. Encontro + participantes (personagens reais ou
+// inimigos avulsos digitados pelo mestre) + condições ativas.
+// ---------------------------------------------------------------------------
+
+model Condicao {
+  id     Int    @id @default(autoincrement())
+  nome   String @unique
+  efeito String
+
+  ativas CombateCondicaoAtiva[]
+}
+
+model CombateEncontro {
+  id           Int      @id @default(autoincrement())
+  mesaId       Int
+  mesa         Mesa     @relation(fields: [mesaId], references: [id], onDelete: Cascade)
+  rodada       Int      @default(1)
+  fase         String   @default("ativacao") // "manutencao" | "controle" | "ativacao"
+  turnoAtual   Int      @default(0) // índice na ordem de iniciativa
+  encerrado    Boolean  @default(false)
+  criadoEm     DateTime @default(now())
+
+  participantes CombateParticipante[]
+}
+
+model CombateParticipante {
+  id                Int             @id @default(autoincrement())
+  encontroId        Int
+  encontro          CombateEncontro @relation(fields: [encontroId], references: [id], onDelete: Cascade)
+  personagemId      Int?
+  personagem        Personagem?     @relation(fields: [personagemId], references: [id], onDelete: Cascade)
+  // Preenchidos só quando não é um Personagem (inimigo avulso do mestre);
+  // catálogo de monstros/bestiário fica para uma fase posterior do projeto.
+  nomeAdHoc         String?
+  defAdHoc          Int?
+  armAdHoc          Int?
+  bonusAtaqueAdHoc  Int?
+  podAdHoc          Int?
+  vidaMaxAdHoc      Int?
+  vidaAtualAdHoc    Int?
+
+  bonusIniciativa   Int // usado na rolagem de iniciativa
+  rolagemIniciativa Int? // total já rolado (2d6 + bonusIniciativa)
+  ordem             Int? // posição na ordem, preenchida após todos rolarem
+  ativouNaRodada    Boolean @default(false)
+  adiado            Boolean @default(false)
+
+  condicoes CombateCondicaoAtiva[]
+}
+
+model CombateCondicaoAtiva {
+  id               Int                  @id @default(autoincrement())
+  participanteId   Int
+  participante     CombateParticipante  @relation(fields: [participanteId], references: [id], onDelete: Cascade)
+  condicaoId       Int
+  condicao         Condicao             @relation(fields: [condicaoId], references: [id])
+  origem           String?
+  rodadasRestantes Int?
+
+  @@unique([participanteId, condicaoId])
 }

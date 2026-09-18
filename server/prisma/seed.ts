@@ -12,6 +12,7 @@ import { conexoes } from "./seedData/conexoes.js";
 import { armas, armaduras, itensGerais } from "./seedData/itens.js";
 import { magias } from "./seedData/magias.js";
 import { carreiras } from "./seedData/carreiras.js";
+import { condicoes } from "./seedData/condicoes.js";
 
 const prisma = new PrismaClient();
 const avisos: string[] = [];
@@ -53,6 +54,15 @@ function resolverParametrizado(
 }
 
 async function main() {
+  // Condições (Etapa 7) tem seu próprio guard: pode ter sido adicionada depois
+  // do resto do catálogo já estar semeado, então não fica presa ao early-return abaixo.
+  if ((await prisma.condicao.count()) === 0) {
+    for (const c of condicoes) {
+      await prisma.condicao.create({ data: { nome: c.nome, efeito: c.efeito } });
+    }
+    console.log(`Condições: ${condicoes.length}`);
+  }
+
   const jaSemeado = await prisma.raca.count();
   if (jaSemeado > 0) {
     console.log("Banco já contém dados estáticos — nada a fazer. Use `prisma migrate reset` para começar do zero.");

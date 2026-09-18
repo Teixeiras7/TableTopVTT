@@ -6,6 +6,7 @@ import { authRouter } from "./routes/auth.js";
 import { mesasRouter } from "./routes/mesas.js";
 import { catalogoRouter } from "./routes/catalogo.js";
 import { personagensRouter } from "./routes/personagens.js";
+import { combatesRouter } from "./routes/combates.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/mesas", mesasRouter);
 app.use("/api/catalogo", catalogoRouter);
 app.use("/api/personagens", personagensRouter);
+app.use("/api/combates", combatesRouter);
 
 // Em produção, um único processo serve a API e o build do frontend.
 if (process.env.NODE_ENV === "production") {

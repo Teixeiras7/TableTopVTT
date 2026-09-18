@@ -90,6 +90,7 @@ export interface AtaqueDisponivel {
   nome: string;
   bonusAtaque: number;
   pod: number | null;
+  corpoACorpo: boolean;
 }
 
 export interface FichaEfetiva {
@@ -134,4 +135,45 @@ export interface ResultadoTeste {
   autoFalha: boolean;
   autoSucesso: boolean;
   sucesso?: boolean;
+}
+
+export interface Condicao {
+  id: number;
+  nome: string;
+  efeito: string;
+}
+
+export interface CombateEncontro {
+  id: number;
+  mesaId: number;
+  rodada: number;
+  fase: string;
+  turnoAtual: number;
+  encerrado: boolean;
+  criadoEm: string;
+}
+
+export interface CombateParticipanteDetalhe {
+  id: number;
+  personagemId: number | null;
+  bonusIniciativa: number;
+  rolagemIniciativa: number | null;
+  ordem: number | null;
+  adiado: boolean;
+  vidaMaxAdHoc: number | null;
+  vidaAtualAdHoc: number | null;
+  espiralVital?: { fis: EspiralEixo; agi: EspiralEixo; int: EspiralEixo };
+  condicoes: { id: number; nome: string; rodadasRestantes: number | null }[];
+  ficha: { nome: string; def: number; arm: number; ataques: AtaqueDisponivel[]; tipo: "personagem" | "adhoc" };
+}
+
+export interface CombateEncontroDetalhe extends CombateEncontro {
+  participantes: CombateParticipanteDetalhe[];
+}
+
+export interface ResultadoAtaque {
+  ataque: ResultadoTeste;
+  dano?: ResultadoTeste;
+  nomeAtacante: string;
+  nomeAlvo: string;
 }

@@ -7,6 +7,8 @@ import { Mesas } from "./pages/Mesas";
 import { Personagens } from "./pages/Personagens";
 import { CriarPersonagem } from "./pages/CriarPersonagem";
 import { Ficha } from "./pages/Ficha";
+import { Combates } from "./pages/Combates";
+import { Combate } from "./pages/Combate";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,22 @@ export default function App() {
               element={
                 <RotaPrivada>
                   <Ficha />
+                </RotaPrivada>
+              }
+            />
+            <Route
+              path="/mesas/:mesaId/combate"
+              element={
+                <RotaPrivada>
+                  <Combates />
+                </RotaPrivada>
+              }
+            />
+            <Route
+              path="/mesas/:mesaId/combate/:combateId"
+              element={
+                <RotaPrivada>
+                  <Combate />
                 </RotaPrivada>
               }
             />

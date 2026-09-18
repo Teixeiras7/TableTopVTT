@@ -294,3 +294,56 @@ fieldset {
   bottom: 1rem;
   border-color: var(--cor-destaque);
 }
+
+.lista-participantes li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.participante-ativo {
+  border-color: var(--cor-destaque);
+  border-width: 2px;
+}
+.linha-participante {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+.linha-condicoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.etiqueta-condicao {
+  background: var(--cor-borda);
+  border-radius: 4px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.etiqueta-condicao button {
+  border: none;
+  padding: 0 0.2rem;
+}
+
+.formulario-participante,
+.formulario-ataque {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+.formulario-participante label,
+.formulario-ataque label {
+  margin-bottom: 0;
+}
+.grade-adhoc {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+  flex: 1;
+}

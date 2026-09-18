@@ -24,6 +24,7 @@ export interface AtaqueDisponivel {
   nome: string;
   bonusAtaque: number; // ACO ou ADI já somado
   pod: number | null;
+  corpoACorpo: boolean; // dano corpo-a-corpo soma FOR do atacante; à distância não
 }
 
 export interface FichaEfetiva {
@@ -55,6 +56,7 @@ export function calcularFichaEfetiva(params: {
         modArma: arma.modificadorAtaque,
       }),
       pod: arma.pod,
+      corpoACorpo: !arma.distancia,
     })),
   };
 }

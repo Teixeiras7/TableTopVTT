@@ -31,7 +31,9 @@ test("arma corpo-a-corpo usa MAE; arma à distância usa DES", () => {
     ],
   });
   assert.equal(ficha.ataques[0].bonusAtaque, 4 + 2 + 1); // MAE + nível + mod
+  assert.equal(ficha.ataques[0].corpoACorpo, true);
   assert.equal(ficha.ataques[1].bonusAtaque, 4 + 1 + 0); // DES + nível + mod
+  assert.equal(ficha.ataques[1].corpoACorpo, false);
 });
 
 test("arma sem a perícia treinada usa nível 0 (uso sem treinamento)", () => {

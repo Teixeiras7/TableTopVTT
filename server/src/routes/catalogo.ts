@@ -53,3 +53,8 @@ catalogoRouter.get("/itens", async (_req, res) => {
   const itens = await prisma.item.findMany({ include: { arma: true, armadura: true }, orderBy: { nome: "asc" } });
   res.json(itens);
 });
+
+catalogoRouter.get("/condicoes", async (_req, res) => {
+  const condicoes = await prisma.condicao.findMany({ orderBy: { nome: "asc" } });
+  res.json(condicoes);
+});

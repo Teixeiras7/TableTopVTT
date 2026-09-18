@@ -14,9 +14,14 @@ export function Personagens() {
     <main className="pagina">
       <header className="cabecalho">
         <h1>Personagens</h1>
-        <Link to={`/mesas/${mesaId}/personagens/novo`}>
-          <button>+ Novo personagem</button>
-        </Link>
+        <div>
+          <Link to={`/mesas/${mesaId}/combate`}>
+            <button>Combate</button>
+          </Link>
+          <Link to={`/mesas/${mesaId}/personagens/novo`}>
+            <button>+ Novo personagem</button>
+          </Link>
+        </div>
       </header>
       <Link to="/" className="link-voltar">
         ← Mesas

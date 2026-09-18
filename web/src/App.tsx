@@ -1,19 +1,64 @@
-import { useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import type { ReactNode } from "react";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { Login } from "./pages/Login";
+import { Mesas } from "./pages/Mesas";
+import { Personagens } from "./pages/Personagens";
+import { CriarPersonagem } from "./pages/CriarPersonagem";
+import { Ficha } from "./pages/Ficha";
+
+const queryClient = new QueryClient();
+
+function RotaPrivada({ children }: { children: ReactNode }) {
+  const { usuario, carregando } = useAuth();
+  if (carregando) return <p className="tela-centralizada">Carregando...</p>;
+  if (!usuario) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
 export default function App() {
-  const [status, setStatus] = useState<"carregando" | "ok" | "erro">("carregando");
-
-  useEffect(() => {
-    fetch("/api/health")
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then(() => setStatus("ok"))
-      .catch(() => setStatus("erro"));
-  }, []);
-
   return (
-    <main style={{ padding: "2rem" }}>
-      <h1>Reinos de Ferro — VTT</h1>
-      <p>API: {status}</p>
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <RotaPrivada>
+                  <Mesas />
+                </RotaPrivada>
+              }
+            />
+            <Route
+              path="/mesas/:mesaId/personagens"
+              element={
+                <RotaPrivada>
+                  <Personagens />
+                </RotaPrivada>
+              }
+            />
+            <Route
+              path="/mesas/:mesaId/personagens/novo"
+              element={
+                <RotaPrivada>
+                  <CriarPersonagem />
+                </RotaPrivada>
+              }
+            />
+            <Route
+              path="/mesas/:mesaId/personagens/:personagemId"
+              element={
+                <RotaPrivada>
+                  <Ficha />
+                </RotaPrivada>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

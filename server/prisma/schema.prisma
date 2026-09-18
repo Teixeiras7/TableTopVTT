@@ -403,6 +403,7 @@ model InventarioItem {
   itemId       Int
   item         Item       @relation(fields: [itemId], references: [id])
   quantidade   Int        @default(1)
+  equipado     Boolean    @default(false) // só item equipado entra no cálculo de ARM/ACO/ADI
   notasEstado  String? // ex: munição restante, marcas de dano — cresce na Etapa 7
 
   @@unique([personagemId, itemId])

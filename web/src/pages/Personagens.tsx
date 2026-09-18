@@ -15,6 +15,9 @@ export function Personagens() {
       <header className="cabecalho">
         <h1>Personagens</h1>
         <div>
+          <Link to={`/mesas/${mesaId}/tabuleiro`}>
+            <button>Tabuleiro</button>
+          </Link>
           <Link to={`/mesas/${mesaId}/combate`}>
             <button>Combate</button>
           </Link>

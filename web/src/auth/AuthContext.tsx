@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { api, getToken, setToken } from "../api";
+import { desconectarSocket } from "../socket";
 
 interface Usuario {
   id: number;
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function sair() {
     setToken(null);
     setUsuario(null);
+    desconectarSocket();
   }
 
   return <AuthContext.Provider value={{ usuario, carregando, entrar, registrar, sair }}>{children}</AuthContext.Provider>;

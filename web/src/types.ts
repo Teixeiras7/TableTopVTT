@@ -66,6 +66,27 @@ export interface Mesa {
   id: number;
   nome: string;
   codigo: string;
+  colunas: number;
+  linhas: number;
+  tamanhoCelula: number;
+}
+
+export interface TokenTabuleiro {
+  id: number;
+  mesaId: number;
+  personagemId: number | null;
+  nome: string | null;
+  cor: string | null;
+  x: number;
+  y: number;
+  personagem: { nome: string } | null;
+}
+
+export interface MensagemChat {
+  id: number;
+  texto: string;
+  criadoEm: string;
+  usuario: { id: number; nome: string };
 }
 
 export interface Personagem {

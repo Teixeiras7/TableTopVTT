@@ -1,4 +1,5 @@
 import express from "express";
+import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { prisma } from "./db.js";
@@ -7,6 +8,8 @@ import { mesasRouter } from "./routes/mesas.js";
 import { catalogoRouter } from "./routes/catalogo.js";
 import { personagensRouter } from "./routes/personagens.js";
 import { combatesRouter } from "./routes/combates.js";
+import { tabuleiroRouter } from "./routes/tabuleiro.js";
+import { criarSocketIO } from "./socket.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -23,6 +26,7 @@ app.use("/api/mesas", mesasRouter);
 app.use("/api/catalogo", catalogoRouter);
 app.use("/api/personagens", personagensRouter);
 app.use("/api/combates", combatesRouter);
+app.use("/api/tabuleiro", tabuleiroRouter);
 
 // Em produção, um único processo serve a API e o build do frontend.
 if (process.env.NODE_ENV === "production") {
@@ -33,7 +37,10 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+const servidorHttp = http.createServer(app);
+criarSocketIO(servidorHttp);
+
 const port = process.env.PORT ?? 3000;
-app.listen(port, () => {
+servidorHttp.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });

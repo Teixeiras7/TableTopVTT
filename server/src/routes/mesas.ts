@@ -14,6 +14,20 @@ mesasRouter.get("/", async (req: RequisicaoAutenticada, res) => {
   res.json(mesas);
 });
 
+mesasRouter.get("/:id", async (req: RequisicaoAutenticada, res) => {
+  const mesa = await prisma.mesa.findUnique({ where: { id: Number(req.params.id) } });
+  if (!mesa) {
+    res.status(404).json({ erro: "Mesa não encontrada" });
+    return;
+  }
+  const membro = await prisma.mesaMembro.findUnique({ where: { usuarioId_mesaId: { usuarioId: req.usuarioId!, mesaId: mesa.id } } });
+  if (!membro) {
+    res.status(403).json({ erro: "Você não é membro dessa mesa" });
+    return;
+  }
+  res.json(mesa);
+});
+
 mesasRouter.post("/", async (req: RequisicaoAutenticada, res) => {
   const { nome } = req.body ?? {};
   if (!nome) {

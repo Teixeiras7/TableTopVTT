@@ -347,3 +347,79 @@ fieldset {
   gap: 0.75rem;
   flex: 1;
 }
+
+.pagina-tabuleiro {
+  max-width: none;
+}
+
+.layout-tabuleiro {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .layout-tabuleiro {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formulario-token {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.moldura-grade {
+  overflow: auto;
+  max-height: 70vh;
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+}
+
+.grade-tabuleiro {
+  position: relative;
+  background-color: var(--cor-fundo);
+  background-image:
+    linear-gradient(to right, var(--cor-borda) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--cor-borda) 1px, transparent 1px);
+  touch-action: none;
+}
+
+.token {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cor-fundo);
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: grab;
+  border: 2px solid var(--cor-fundo-cartao);
+  user-select: none;
+}
+
+.area-chat {
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
+}
+.lista-chat {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+.mensagem-propria {
+  text-align: right;
+}
+.formulario-chat {
+  display: flex;
+  gap: 0.5rem;
+}
+.formulario-chat input {
+  flex: 1;
+}

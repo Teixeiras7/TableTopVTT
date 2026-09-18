@@ -25,6 +25,7 @@ model Usuario {
   mesasCriadas Mesa[]       @relation("MesaCriador")
   mesas        MesaMembro[]
   personagens  Personagem[]
+  mensagens    MensagemChat[]
 }
 
 model Mesa {
@@ -41,6 +42,8 @@ model Mesa {
   membros     MesaMembro[]
   personagens Personagem[]
   combates    CombateEncontro[]
+  tokens      Token[]
+  mensagens   MensagemChat[]
 }
 
 model MesaMembro {
@@ -340,6 +343,7 @@ model Personagem {
   magias      PersonagemMagia[]
   inventario  InventarioItem[]
   combates    CombateParticipante[]
+  tokens      Token[]
 }
 
 model PersonagemCarreira {
@@ -470,4 +474,32 @@ model CombateCondicaoAtiva {
   rodadasRestantes Int?
 
   @@unique([participanteId, condicaoId])
+}
+
+// ---------------------------------------------------------------------------
+// Tabuleiro (tokens) e chat — Etapa 8. Grade simples com tokens arrastáveis
+// sincronizados por Socket.IO; sem fog of war (decidido na análise inicial).
+// ---------------------------------------------------------------------------
+
+model Token {
+  id           Int         @id @default(autoincrement())
+  mesaId       Int
+  mesa         Mesa        @relation(fields: [mesaId], references: [id], onDelete: Cascade)
+  personagemId Int?
+  personagem   Personagem? @relation(fields: [personagemId], references: [id], onDelete: Cascade)
+  nome         String? // usado quando o token não representa um Personagem
+  cor          String? // cor do marcador quando não é um Personagem
+  x            Int         @default(0)
+  y            Int         @default(0)
+  criadoEm     DateTime    @default(now())
+}
+
+model MensagemChat {
+  id        Int      @id @default(autoincrement())
+  mesaId    Int
+  mesa      Mesa     @relation(fields: [mesaId], references: [id], onDelete: Cascade)
+  usuarioId Int
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  texto     String
+  criadoEm  DateTime @default(now())
 }

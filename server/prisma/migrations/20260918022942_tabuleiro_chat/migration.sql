@@ -1,0 +1,24 @@
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "mesaId" INTEGER NOT NULL,
+    "personagemId" INTEGER,
+    "nome" TEXT,
+    "cor" TEXT,
+    "x" INTEGER NOT NULL DEFAULT 0,
+    "y" INTEGER NOT NULL DEFAULT 0,
+    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Token_mesaId_fkey" FOREIGN KEY ("mesaId") REFERENCES "Mesa" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Token_personagemId_fkey" FOREIGN KEY ("personagemId") REFERENCES "Personagem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "MensagemChat" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "mesaId" INTEGER NOT NULL,
+    "usuarioId" INTEGER NOT NULL,
+    "texto" TEXT NOT NULL,
+    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "MensagemChat_mesaId_fkey" FOREIGN KEY ("mesaId") REFERENCES "Mesa" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "MensagemChat_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "Usuario" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
